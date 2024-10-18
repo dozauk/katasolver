@@ -1,0 +1,2 @@
+# katasolver
+Katamino Solver
