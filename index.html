@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katamino Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(5, 30px);
+            gap: 1px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        /* Add this to your existing styles */
+        #no-solution-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Add this new div for the message -->
+        <div id="no-solution-message">No Solution Found</div>
+        <h1>Katamino Solver</h1>
+        <div id="board"></div>
+        <div id="piece-selector">
+            <div id="piece-buttons">
+                <div class="piece-button" data-piece="1">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="2" height="1" fill="orange"/>
+                        <rect x="0" y="1" width="1" height="4" fill="orange"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="2">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="1" height="1" fill="brown"/>
+                        <rect x="0" y="1" width="2" height="1" fill="brown"/>
+                        <rect x="0" y="2" width="1" height="2" fill="brown"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="3">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="1" height="3" fill="darkgreen"/>
+                        <rect x="1" y="1" width="2" height="1" fill="darkgreen"/>
+                     
+                        
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="4">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="2" height="2" fill="pink"/>
+                        <rect x="0" y="2" width="1" height="1" fill="pink"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="5">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="1" height="2" fill="lightgreen"/>
+                        <rect x="1" y="1" width="1" height="2" fill="lightgreen"/>
+                        <rect x="2" y="2" width="1" height="1" fill="lightgreen"/>                        
+                       
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="6">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="2" height="1" fill="blue"/>
+                        <rect x="1" y="1" width="1" height="2" fill="blue"/>
+                        <rect x="2" y="2" width="1" height="1" fill="blue"/>
+                    </svg>
+                </div>
+            </div>
+            <style>
+                #piece-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+                .piece-button {
+                    cursor: pointer;
+                }
+            </style>
+            <div id="piece-buttons">
+                <div class="piece-button" data-piece="7">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="1" height="3" fill="teal"/>
+                        <rect x="1" y="2" width="2" height="1" fill="teal"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="8">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="2" height="1" fill="darkblue"/>
+                        <rect x="1" y="1" width="3" height="1" fill="darkblue"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="9">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="3" height="1" fill="yellow"/>
+                        <rect x="0" y="1" width="1" height="1" fill="yellow"/>
+                        <rect x="2" y="1" width="1" height="1" fill="yellow"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="a">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="2" height="1" fill="gray"/>
+                        <rect x="1" y="1" width="2" height="1" fill="gray"/>
+                        <rect x="1" y="2" width="1" height="1" fill="gray"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="b">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="0" y="0" width="1" height="5" fill="darkblue"/>
+                    </svg>
+                </div>
+                <div class="piece-button" data-piece="c">
+                    <svg width="50" height="50" viewBox="0 0 5 5">
+                        <rect x="1" y="0" width="1" height="1" fill="red"/>
+                        <rect x="0" y="1" width="3" height="1" fill="red"/>
+                        <rect x="1" y="2" width="1" height="1" fill="red"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div id="selected-pieces"></div>
+        <button onclick="reset()">Reset</button>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const piecesInput = document.getElementById('pieces');
+        const selectedPiecesDiv = document.getElementById('selected-pieces');
+        const pieceButtons = document.querySelectorAll('.piece-button');
+        let selectedPieces = [];
+
+        // Hide the board initially
+        board.style.display = 'none';
+        function resizeBoard() {
+            const numPieces = selectedPieces.length;
+            if (numPieces >= 3) {
+                const numColumns = numPieces;
+                const numRows = 5;
+                const totalCells = numColumns * numRows;
+
+                // Resize the board
+                board.style.gridTemplateColumns = `repeat(${numColumns}, 1fr)`;
+                board.style.width = `${numColumns * 30}px`; // Assuming each cell is 50px wide
+
+                // Clear existing cells
+                board.innerHTML = '';
+
+                // Create new cells
+                for (let i = 0; i < totalCells; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        // Modify the showBoardAndSolve function
+        function showBoardAndSolve() {
+            // Show the board
+            board.style.display = 'grid';
+
+            // Resize the board
+            resizeBoard();
+
+            // Initialize the board
+            board.innerHTML = '';
+            const totalCells = selectedPieces.length * 5;
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                board.appendChild(cell);
+            }
+
+            // Run the solve function
+            solve();
+        }
+
+        // Add click event listeners to piece buttons
+        pieceButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const piece = button.getAttribute('data-piece');
+                const index = selectedPieces.indexOf(piece);
+                if (index === -1) {
+                    // Select the piece
+                    selectedPieces.push(piece);
+                    button.style.opacity = '0.5';
+                    button.style.border = '2px solid black';
+                    button.style.backgroundColor = '#f0f0f0';
+                } else {
+                    // Unselect the piece
+                    selectedPieces.splice(index, 1);
+                    button.style.opacity = '1';
+                    button.style.border = 'none';
+                    button.style.backgroundColor = 'transparent';
+                }
+
+                updateSelectedPieces();
+                // Hide the "No Solution Found" message when a piece is selected or unselected
+                document.getElementById('no-solution-message').style.display = 'none';
+
+                if (selectedPieces.length >= 3) {
+                    showBoardAndSolve();
+                } else {
+                    // Hide the board if less than 3 pieces are selected
+                    board.style.display = 'none';
+                }
+
+            });
+        });
+
+        function updateSelectedPieces() {
+            selectedPiecesDiv.textContent = `Selected pieces: ${selectedPieces.join(', ')}`;
+        }
+
+        function solve() {
+            // Parse and validate input
+            const inputPieces = selectedPieces.join('').toLowerCase();
+            const cols = inputPieces.length;
+            
+            const validPieces = inputPieces.split('').map(c => {
+                switch (c) {
+                    case '1': return 1;
+                    case '2': return 2;
+                    case '3': return 3;
+                    case '4': return 4;
+                    case '5': return 5;
+                    case '6': return 6;
+                    case '7': return 7;
+                    case '8': return 8;
+                    case '9': return 9;
+                    case 'a': return 10;
+                    case 'b': return 11;
+                    case 'c': return 12;
+                    default: return 0;
+                }
+            }).filter(n => n >= 1 && n <= 12);
+
+            const flips = new Array(13).fill(0);
+            const rots = new Array(13).fill(0);
+
+            // Define shapes
+            const shapes = {
+                1: [
+                    [1, 1, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                2: [
+                    [1, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                3: [
+                    [1, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                4: [
+                    [1, 1, 0, 0, 0],
+                    [1, 1, 0, 0, 0],
+                    [0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                5: [
+                    [1, 1, 0, 0, 0],
+                    [0, 1, 1, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                6: [
+                    [1, 1, 0, 0, 0],
+                    [0, 1, 0, 0, 0],
+                    [0, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                7: [
+                    [1, 1, 1, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                8: [
+                    [1, 1, 0, 0, 0],
+                    [0, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                9: [
+                    [1, 1, 1, 0, 0],
+                    [1, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                10: [
+                    [1, 1, 0, 0, 0],
+                    [0, 1, 1, 0, 0],
+                    [0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                11: [
+                    [1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                12: [
+                    [0, 1, 0, 0, 0],
+                    [1, 1, 1, 0, 0],
+                    [0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ]
+            };
+
+            flips[1] = 1; rots[1] = 3;
+            flips[2] = 1; rots[2] = 3;
+            flips[3] = 0; rots[3] = 3;
+            flips[4] = 1; rots[4] = 3;
+            flips[5] = 1; rots[5] = 3;
+            flips[6] = 1; rots[6] = 1;
+            flips[7] = 1; rots[7] = 3;
+            flips[8] = 1; rots[8] = 3;
+            flips[9] = 0; rots[9] = 3;
+            flips[10] = 1; rots[10] = 1;
+            flips[11] = 0; rots[11] = 1;
+            flips[12] = 0; rots[12] = 0;
+
+            function rotateShape(shape) {
+                let newShape = Array(5).fill().map(() => Array(5).fill(0));
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        newShape[i][j] = shape[j][4 - i];
+                    }
+                }
+                return transpose(newShape);
+            }
+
+            function transpose(shape) {
+                const [minX, minY, maxX, maxY] = getBounds(shape);
+                
+                if (minX > 0) {
+                    for (let i = 0; i < 5; i++) {
+                        for (let j = 0; j < 5; j++) {
+                            shape[i][j] = (i + minX > 4) ? 0 : shape[i + minX][j];
+                        }
+                    }
+                }
+                if (minY > 0) {
+                    for (let i = 0; i < 5; i++) {
+                        for (let j = 0; j < 5; j++) {
+                            shape[i][j] = (j + minY > 4) ? 0 : shape[i][j + minY];
+                        }
+                    }
+                }
+                return shape;
+            }
+
+            function getBounds(shape) {
+                let minX = 5, minY = 5, maxX = 0, maxY = 0;
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        if (shape[i][j] === 1) {
+                            minX = Math.min(minX, i);
+                            minY = Math.min(minY, j);
+                            maxX = Math.max(maxX, i);
+                            maxY = Math.max(maxY, j);
+                        }
+                    }
+                }
+                return [minX, minY, maxX, maxY];
+            }
+
+            function solve(board, pieces, index) {
+                if (index === pieces.length) {
+                    return true; // All pieces placed successfully
+                }
+
+                const piece = pieces[index];
+                const shape = shapes[piece];
+
+                for (let flip = 0; flip <= flips[piece]; flip++) {
+                    let currentShape = flip ? flipShape(shape) : shape;
+
+                    for (let rot = 0; rot <= rots[piece]; rot++) {
+                        for (let row = 0; row < board.length; row++) {
+                            for (let col = 0; col < board[0].length; col++) {
+                                if (canPlacePiece(board, currentShape, row, col)) {
+                                    placePiece(board, currentShape, row, col, piece);
+                                    
+                                    // Add this check
+                                    if (!boardInvalid(board)) {
+                                        if (solve(board, pieces, index + 1)) {
+                                            return true;
+                                        }
+                                    }
+                                    
+                                    removePiece(board, currentShape, row, col);
+                                }
+                            }
+                        }
+                        currentShape = rotateShape(currentShape);
+                    }
+                }
+
+                return false;
+            }
+
+            function canPlacePiece(board, shape, startRow, startCol) {
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        if (shape[i][j] === 1) {
+                            if (startRow + i >= board.length || startCol + j >= board[0].length || board[startRow + i][startCol + j] !== 0) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function placePiece(board, shape, startRow, startCol, pieceNum) {
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        if (shape[i][j] === 1) {
+                            board[startRow + i][startCol + j] = pieceNum;
+                        }
+                    }
+                }
+            }
+
+            function removePiece(board, shape, startRow, startCol) {
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        if (shape[i][j] === 1) {
+                            board[startRow + i][startCol + j] = 0;
+                        }
+                    }
+                }
+            }
+
+            function flipShape(shape) {
+                return shape.map(row => [...row].reverse());
+            }
+
+            function boardInvalid(board) {
+                const cols = board[0].length;
+                const checkBoard = board.map(row => [...row]);
+                let areas = 0;
+
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        if (checkBoard[i][j] === 0) {
+                            areas++;
+                            fillBoard(checkBoard, i, j, -areas);
+                        }
+                    }
+                }
+
+                const volumes = new Array(areas).fill(0);
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        if (checkBoard[i][j] < 0) {
+                            volumes[-checkBoard[i][j] - 1]++;
+                        }
+                    }
+                }
+
+                return volumes.some(volume => volume % 5 !== 0);
+            }
+
+            function fillBoard(board, x, y, areaVal) {
+                const cols = board[0].length;
+                if (x < 0 || x >= 5 || y < 0 || y >= cols || board[x][y] !== 0) {
+                    return;
+                }
+                board[x][y] = areaVal;
+                fillBoard(board, x + 1, y, areaVal);
+                fillBoard(board, x - 1, y, areaVal);
+                fillBoard(board, x, y + 1, areaVal);
+                fillBoard(board, x, y - 1, areaVal);
+            }
+
+            // Initialize the board
+            const board = Array(5).fill().map(() => Array(cols).fill(0));
+
+            // Solve the puzzle
+            if (solve(board, validPieces, 0)) {
+                console.log("Solution found!");
+                displaySolution(board);
+            } else {
+                console.log("No solution found.");
+                displayNoSolution();
+            }
+
+            function displaySolution(board) {
+                const cells = document.getElementsByClassName('cell');
+                const colors = {
+                    1: '#FF7F00',  // orange
+                    2: '#964B00',  // brown
+                    3: '#007700',  // green
+                    4: '#FFC0CB',  // pink
+                    5: '#33FF33',  // green
+                    6: '#0077FF',  // light blue
+                    7: '#0000FF',  // blue
+                    8: '#800080',  // purple
+                    9: '#FFFF00',  // yellow
+                    10: '#808080', // grey
+                    11: '#0000FF', // blue
+                    12: '#FF0000'  // red
+                };
+                board.flat().forEach((piece, index) => {
+                    if (index < cells.length) {
+                        cells[index].textContent = piece || '';
+                        cells[index].style.backgroundColor = piece ? colors[piece] : 'white';
+                    }
+                });
+            }
+
+            function displayNoSolution() {
+                const cells = document.getElementsByClassName('cell');
+                Array.from(cells).forEach(cell => {
+                    cell.textContent = '';
+                    cell.style.backgroundColor = 'white';
+                });
+                
+                // Show the "No Solution Found" message
+                const noSolutionMessage = document.getElementById('no-solution-message');
+                noSolutionMessage.style.display = 'block';
+            }
+        }
+
+        // Add this new function
+        function reset() {
+            // Clear the board
+            board.innerHTML = '';
+            board.style.display = 'none';
+
+            // Unselect all pieces
+            selectedPieces = [];
+            pieceButtons.forEach(button => {
+                button.style.opacity = '1';
+                button.style.border = 'none';
+                button.style.backgroundColor = 'transparent';
+            });
+
+            // Update the selected pieces display
+            updateSelectedPieces();
+
+            // Hide the "No Solution Found" message
+            document.getElementById('no-solution-message').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
